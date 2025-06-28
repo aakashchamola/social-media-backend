@@ -9,17 +9,17 @@ let pool;
  */
 const initializePool = () => {
 	if (!pool) {
-		// Railway provides DATABASE_URL, but also support individual variables
+		// Priority: DATABASE_URL (Railway) > individual env vars (local)
 		const databaseConfig = process.env.DATABASE_URL ? {
 			connectionString: process.env.DATABASE_URL,
 			ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 		} : {
-			host: process.env.DB_HOST,
-			port: process.env.DB_PORT,
-			database: process.env.DB_NAME,
-			user: process.env.DB_USER,
-			password: process.env.DB_PASSWORD,
-			ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+			host: process.env.DB_HOST || 'localhost',
+			port: process.env.DB_PORT || 5432,
+			database: process.env.DB_NAME || 'social_media_db',
+			user: process.env.DB_USER || 'postgres',
+			password: process.env.DB_PASSWORD || '',
+			ssl: false
 		};
 
 		pool = new Pool({
