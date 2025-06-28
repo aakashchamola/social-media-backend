@@ -3,6 +3,8 @@ const {
   getPostById,
   getPostsByUserId,
   deletePost,
+  getFeedPosts,
+  getScheduledPosts,
 } = require("../models/post.js");
 const logger = require("../utils/logger");
 
@@ -11,7 +13,7 @@ const logger = require("../utils/logger");
  */
 const create = async (req, res) => {
   try {
-    const { content, media_url, comments_enabled } = req.validatedData;
+    const { content, media_url, comments_enabled, scheduled_at } = req.validatedData;
     const userId = req.user.id;
 
     const post = await createPost({
@@ -19,12 +21,17 @@ const create = async (req, res) => {
       content,
       media_url,
       comments_enabled,
+      scheduled_at,
     });
 
-    logger.verbose(`User ${userId} created post ${post.id}`);
+    logger.verbose(`User ${userId} created ${scheduled_at ? 'scheduled ' : ''}post ${post.id}`);
+
+    const message = scheduled_at 
+      ? `Post scheduled successfully for ${new Date(scheduled_at).toLocaleString()}`
+      : "Post created successfully";
 
     res.status(201).json({
-      message: "Post created successfully",
+      message,
       post,
     });
   } catch (error) {
@@ -84,7 +91,7 @@ const getUserPosts = async (req, res) => {
  */
 const getMyPosts = async (req, res) => {
   try {
-    const { user_id: userId } = req.params;
+    const userId = req.user.id;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
     const offset = (page - 1) * limit;
@@ -128,12 +135,57 @@ const remove = async (req, res) => {
   }
 };
 
-// TODO: Implement getFeed controller for content feed functionality
-// This should return posts from users that the current user follows
+/**
+ * Get feed posts for current user (posts from followed users + own posts)
+ */
+const getFeed = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = (page - 1) * limit;
 
-// TODO: Implement updatePost controller for editing posts
+    const posts = await getFeedPosts(userId, limit, offset);
 
-// TODO: Implement searchPosts controller for searching posts by content
+    res.json({
+      posts,
+      pagination: {
+        page,
+        limit,
+        hasMore: posts.length === limit,
+      },
+    });
+  } catch (error) {
+    logger.critical("Get feed error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+/**
+ * Get current user's scheduled posts
+ */
+const getMyScheduledPosts = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = (page - 1) * limit;
+
+    const posts = await getScheduledPosts(userId, limit, offset);
+
+    res.json({
+      posts,
+      pagination: {
+        page,
+        limit,
+        hasMore: posts.length === limit,
+      },
+    });
+  } catch (error) {
+    logger.critical("Get scheduled posts error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 
 module.exports = {
   create,
@@ -141,4 +193,6 @@ module.exports = {
   getUserPosts,
   getMyPosts,
   remove,
+  getFeed,
+  getMyScheduledPosts,
 };

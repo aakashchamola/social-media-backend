@@ -9,11 +9,11 @@ const authenticateToken = async (req, res, next) => {
 	try {
 		const authHeader = req.headers["authorization"];
 
-		const decoded = verifyToken(authHeader);
-
 		if (!authHeader) {
 			return res.status(401).json({ error: "Access token required" });
 		}
+
+		const decoded = verifyToken(authHeader);
 
 		const user = await getUserById(decoded.userId);
 		if (!user) {

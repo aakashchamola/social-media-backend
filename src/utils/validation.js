@@ -20,6 +20,15 @@ const createPostSchema = Joi.object({
 	content: Joi.string().min(1).max(1000).required(),
 	media_url: Joi.string().uri().optional(),
 	comments_enabled: Joi.boolean().default(true),
+	scheduled_at: Joi.date().greater('now').optional(),
+});
+
+const createCommentSchema = Joi.object({
+	content: Joi.string().min(1).max(500).required(),
+});
+
+const updateCommentSchema = Joi.object({
+	content: Joi.string().min(1).max(500).required(),
 });
 
 /**
@@ -47,5 +56,7 @@ module.exports = {
 	userRegistrationSchema,
 	userLoginSchema,
 	createPostSchema,
+	createCommentSchema,
+	updateCommentSchema,
 	validateRequest,
 };

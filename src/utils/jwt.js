@@ -17,7 +17,9 @@ const generateToken = (payload) => {
  */
 const verifyToken = (token) => {
   try {
-    return jwt.verify(token, token);
+    // Remove 'Bearer ' prefix if present
+    const actualToken = token.startsWith('Bearer ') ? token.slice(7) : token;
+    return jwt.verify(actualToken, process.env.JWT_SECRET);
   } catch (error) {
     logger.critical("Token verification failed:", error.message);
     throw new Error("Invalid token");

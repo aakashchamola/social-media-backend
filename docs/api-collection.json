@@ -1,15 +1,39 @@
 {
 	"info": {
-		"name": "Social Media Backend API",
-		"description": "Backend API for a social media platform with authentication, posts, and social features",
+		"name": "🚀 Social Media Backend API - Complete Collection",
+		"description": "Comprehensive API collection for testing all REST and GraphQL endpoints of the social media backend. Includes authentication, user management, posts, comments, likes, and social features.",
+		"version": "1.0.0",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "Authentication",
+			"name": "🔐 Authentication",
+			"description": "User registration, login, and profile management endpoints",
 			"item": [
 				{
-					"name": "Register User",
+					"name": "Register New User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Registration successful\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.test(\"Response has user data\", function () {",
+									"        pm.expect(responseJson).to.have.property('user');",
+									"        pm.expect(responseJson.user).to.have.property('id');",
+									"        pm.expect(responseJson.user).to.have.property('username');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -20,7 +44,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\",\n  \"full_name\": \"Test User\"\n}"
+							"raw": "{\n  \"username\": \"{{test_username}}\",\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{test_password}}\",\n  \"full_name\": \"{{test_full_name}}\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/auth/register",
@@ -31,6 +55,31 @@
 				},
 				{
 					"name": "Login User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Login successful\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.test(\"Response has token\", function () {",
+									"        pm.expect(responseJson).to.have.property('token');",
+									"        pm.expect(responseJson).to.have.property('user');",
+									"    });",
+									"    ",
+									"    // Save token for subsequent requests",
+									"    pm.environment.set('token', responseJson.token);",
+									"    pm.environment.set('user_id', responseJson.user.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -41,7 +90,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\"\n}"
+							"raw": "{\n  \"username\": \"{{test_username}}\",\n  \"password\": \"{{test_password}}\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/auth/login",
@@ -51,7 +100,30 @@
 					}
 				},
 				{
-					"name": "Get Profile",
+					"name": "Get Current User Profile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Profile retrieved successfully\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.test(\"Profile has required fields\", function () {",
+									"        pm.expect(responseJson).to.have.property('id');",
+									"        pm.expect(responseJson).to.have.property('username');",
+									"        pm.expect(responseJson).to.have.property('email');",
+									"        pm.expect(responseJson).to.have.property('full_name');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [
@@ -70,10 +142,198 @@
 			]
 		},
 		{
-			"name": "Posts",
+			"name": "👥 User Management",
+			"description": "User search, follow/unfollow, and profile endpoints",
+			"item": [
+				{
+					"name": "Search Users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Search successful\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.test(\"Response is array\", function () {",
+									"        pm.expect(responseJson).to.be.an('array');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/users/search?q={{search_query}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users", "search"],
+							"query": [
+								{
+									"key": "q",
+									"value": "{{search_query}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Follow User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Follow successful\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.test(\"Response confirms follow\", function () {",
+									"        pm.expect(responseJson).to.have.property('message');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/users/follow/{{target_user_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users", "follow", "{{target_user_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Unfollow User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Unfollow successful\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.test(\"Response confirms unfollow\", function () {",
+									"        pm.expect(responseJson).to.have.property('message');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/users/follow/{{target_user_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users", "follow", "{{target_user_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Get User Profile by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Profile retrieved successfully\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.test(\"Profile has user data\", function () {",
+									"        pm.expect(responseJson).to.have.property('id');",
+									"        pm.expect(responseJson).to.have.property('username');",
+									"        pm.expect(responseJson).to.have.property('full_name');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/users/{{target_user_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users", "{{target_user_id}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "📝 Posts",
+			"description": "Post creation, feed, and management endpoints",
 			"item": [
 				{
 					"name": "Create Post",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Post created successfully\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.test(\"Post has required fields\", function () {",
+									"        pm.expect(responseJson).to.have.property('id');",
+									"        pm.expect(responseJson).to.have.property('content');",
+									"        pm.expect(responseJson).to.have.property('user_id');",
+									"    });",
+									"    ",
+									"    // Save post ID for subsequent tests",
+									"    pm.environment.set('test_post_id', responseJson.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -88,7 +348,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"content\": \"This is my new post!\",\n  \"media_url\": \"https://example.com/image.jpg\",\n  \"comments_enabled\": true\n}"
+							"raw": "{\n  \"content\": \"{{test_post_content}}\",\n  \"media_url\": \"{{test_media_url}}\",\n  \"comments_enabled\": true\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/posts",
@@ -98,7 +358,72 @@
 					}
 				},
 				{
-					"name": "Get My Posts",
+					"name": "Create Scheduled Post",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Scheduled post created successfully\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.test(\"Post has scheduled date\", function () {",
+									"        pm.expect(responseJson).to.have.property('scheduled_for');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"This is a scheduled post for future publishing!\",\n  \"scheduled_for\": \"2025-01-30T15:00:00.000Z\",\n  \"comments_enabled\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/posts",
+							"host": ["{{base_url}}"],
+							"path": ["api", "posts"]
+						}
+					}
+				},
+				{
+					"name": "Get Personalized Feed",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Feed retrieved successfully\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.test(\"Feed is array\", function () {",
+									"        pm.expect(responseJson).to.be.an('array');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [
@@ -108,17 +433,17 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/posts/my?page=1&limit=20",
+							"raw": "{{base_url}}/api/posts/feed?limit={{feed_limit}}&offset={{feed_offset}}",
 							"host": ["{{base_url}}"],
-							"path": ["api", "posts", "my"],
+							"path": ["api", "posts", "feed"],
 							"query": [
 								{
-									"key": "page",
-									"value": "1"
+									"key": "limit",
+									"value": "{{feed_limit}}"
 								},
 								{
-									"key": "limit",
-									"value": "20"
+									"key": "offset",
+									"value": "{{feed_offset}}"
 								}
 							]
 						}
@@ -126,17 +451,65 @@
 				},
 				{
 					"name": "Get Post by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Post retrieved successfully\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.test(\"Post has required fields\", function () {",
+									"        pm.expect(responseJson).to.have.property('id');",
+									"        pm.expect(responseJson).to.have.property('content');",
+									"        pm.expect(responseJson).to.have.property('username');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
 						"url": {
-							"raw": "{{base_url}}/api/posts/1",
+							"raw": "{{base_url}}/api/posts/{{test_post_id}}",
 							"host": ["{{base_url}}"],
-							"path": ["api", "posts", "1"]
+							"path": ["api", "posts", "{{test_post_id}}"]
 						}
 					}
 				},
 				{
 					"name": "Delete Post",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Post deleted successfully\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.test(\"Deletion confirmed\", function () {",
+									"        pm.expect(responseJson).to.have.property('message');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -146,9 +519,572 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/posts/1",
+							"raw": "{{base_url}}/api/posts/{{test_post_id}}",
 							"host": ["{{base_url}}"],
-							"path": ["api", "posts", "1"]
+							"path": ["api", "posts", "{{test_post_id}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "💬 Comments",
+			"description": "Comment creation, editing, and management endpoints",
+			"item": [
+				{
+					"name": "Get Comments for Post",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Comments retrieved successfully\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.test(\"Comments is array\", function () {",
+									"        pm.expect(responseJson).to.be.an('array');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/comments/post/{{test_post_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "comments", "post", "{{test_post_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Create Comment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Comment created successfully\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.test(\"Comment has required fields\", function () {",
+									"        pm.expect(responseJson).to.have.property('id');",
+									"        pm.expect(responseJson).to.have.property('content');",
+									"        pm.expect(responseJson).to.have.property('post_id');",
+									"    });",
+									"    ",
+									"    // Save comment ID for subsequent tests",
+									"    pm.environment.set('test_comment_id', responseJson.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"{{test_comment_content}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/comments/post/{{test_post_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "comments", "post", "{{test_post_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Update Comment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Comment updated successfully\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.test(\"Comment has updated content\", function () {",
+									"        pm.expect(responseJson).to.have.property('content');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"{{updated_comment_content}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/comments/{{test_comment_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "comments", "{{test_comment_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete Comment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Comment deleted successfully\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.test(\"Deletion confirmed\", function () {",
+									"        pm.expect(responseJson).to.have.property('message');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/comments/{{test_comment_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "comments", "{{test_comment_id}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "❤️ Likes",
+			"description": "Like and unlike post endpoints",
+			"item": [
+				{
+					"name": "Like Post",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Post liked successfully\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.test(\"Like confirmed\", function () {",
+									"        pm.expect(responseJson).to.have.property('message');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/likes/post/{{test_post_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "likes", "post", "{{test_post_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Get Like Status and Count",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Like status retrieved successfully\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.test(\"Response has like data\", function () {",
+									"        pm.expect(responseJson).to.have.property('like_count');",
+									"        pm.expect(responseJson).to.have.property('user_liked');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/likes/post/{{test_post_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "likes", "post", "{{test_post_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Unlike Post",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Post unliked successfully\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.test(\"Unlike confirmed\", function () {",
+									"        pm.expect(responseJson).to.have.property('message');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/likes/post/{{test_post_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "likes", "post", "{{test_post_id}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🕸️ GraphQL API",
+			"description": "GraphQL queries and mutations for all features",
+			"item": [
+				{
+					"name": "GraphQL - Get Current User (me)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"GraphQL query successful\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.test(\"Response has data\", function () {",
+									"        pm.expect(responseJson).to.have.property('data');",
+									"        pm.expect(responseJson.data).to.have.property('me');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"query GetCurrentUser { me { id username email full_name follower_count following_count } }\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": ["{{base_url}}"],
+							"path": ["graphql"]
+						}
+					}
+				},
+				{
+					"name": "GraphQL - User Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"GraphQL login successful\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.test(\"Login response has token\", function () {",
+									"        pm.expect(responseJson.data).to.have.property('login');",
+									"        pm.expect(responseJson.data.login).to.have.property('token');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"mutation Login($username: String!, $password: String!) { login(username: $username, password: $password) { token user { id username full_name } } }\",\n  \"variables\": {\n    \"username\": \"{{test_username}}\",\n    \"password\": \"{{test_password}}\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": ["{{base_url}}"],
+							"path": ["graphql"]
+						}
+					}
+				},
+				{
+					"name": "GraphQL - Get Feed",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"GraphQL feed query successful\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.test(\"Feed data received\", function () {",
+									"        pm.expect(responseJson.data).to.have.property('feed');",
+									"        pm.expect(responseJson.data.feed).to.be.an('array');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"query GetFeed($limit: Int, $offset: Int) { feed(limit: $limit, offset: $offset) { id content media_url created_at username full_name like_count comment_count } }\",\n  \"variables\": {\n    \"limit\": 10,\n    \"offset\": 0\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": ["{{base_url}}"],
+							"path": ["graphql"]
+						}
+					}
+				},
+				{
+					"name": "GraphQL - Create Post",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"GraphQL post creation successful\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.test(\"Post created with data\", function () {",
+									"        pm.expect(responseJson.data).to.have.property('createPost');",
+									"        pm.expect(responseJson.data.createPost).to.have.property('id');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"mutation CreatePost($content: String!, $media_url: String) { createPost(content: $content, media_url: $media_url) { id content media_url created_at username full_name } }\",\n  \"variables\": {\n    \"content\": \"{{test_post_content}}\",\n    \"media_url\": \"{{test_media_url}}\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": ["{{base_url}}"],
+							"path": ["graphql"]
+						}
+					}
+				},
+				{
+					"name": "GraphQL - Search Users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"GraphQL user search successful\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.test(\"Search results received\", function () {",
+									"        pm.expect(responseJson.data).to.have.property('searchUsers');",
+									"        pm.expect(responseJson.data.searchUsers).to.be.an('array');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"query SearchUsers($query: String!) { searchUsers(query: $query) { id username full_name follower_count following_count } }\",\n  \"variables\": {\n    \"query\": \"{{search_query}}\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/graphql",
+							"host": ["{{base_url}}"],
+							"path": ["graphql"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🔍 System Health",
+			"description": "Health check and system status endpoints",
+			"item": [
+				{
+					"name": "Health Check",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Health check successful\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.test(\"System is healthy\", function () {",
+									"        pm.expect(responseJson).to.have.property('status');",
+									"        pm.expect(responseJson.status).to.equal('OK');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": ["{{base_url}}"],
+							"path": ["health"]
 						}
 					}
 				}
@@ -158,11 +1094,110 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "http://localhost:3000"
+			"value": "http://localhost:3000",
+			"type": "string"
 		},
 		{
 			"key": "token",
-			"value": "your_jwt_token_here"
+			"value": "your_jwt_token_here",
+			"type": "string"
+		},
+		{
+			"key": "test_username",
+			"value": "testuser",
+			"type": "string"
+		},
+		{
+			"key": "test_email",
+			"value": "test@example.com",
+			"type": "string"
+		},
+		{
+			"key": "test_password",
+			"value": "password123",
+			"type": "string"
+		},
+		{
+			"key": "test_full_name",
+			"value": "Test User",
+			"type": "string"
+		},
+		{
+			"key": "test_post_content",
+			"value": "This is my test post from Postman!",
+			"type": "string"
+		},
+		{
+			"key": "test_media_url",
+			"value": "https://example.com/test-image.jpg",
+			"type": "string"
+		},
+		{
+			"key": "test_comment_content",
+			"value": "This is a test comment!",
+			"type": "string"
+		},
+		{
+			"key": "updated_comment_content",
+			"value": "This is an updated test comment!",
+			"type": "string"
+		},
+		{
+			"key": "search_query",
+			"value": "test",
+			"type": "string"
+		},
+		{
+			"key": "target_user_id",
+			"value": "2",
+			"type": "string"
+		},
+		{
+			"key": "test_post_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "test_comment_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "feed_limit",
+			"value": "10",
+			"type": "string"
+		},
+		{
+			"key": "feed_offset",
+			"value": "0",
+			"type": "string"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-refresh variables if needed",
+					"console.log('🚀 Running Social Media Backend API Test');"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript", 
+				"exec": [
+					"// Global test logging",
+					"console.log(`✅ ${pm.info.requestName}: ${pm.response.status}`);"
+				]
+			}
 		}
 	]
 }
