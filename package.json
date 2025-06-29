@@ -4,14 +4,13 @@
 	"description": "Backend for a social media platform",
 	"main": "src/app.js",
 	"scripts": {
-		"start": "node src/app.js",
-		"dev": "nodemon src/app.js",
-		"start:verbose": "LOG_LEVEL=verbose node src/app.js",
-		"start:critical": "LOG_LEVEL=critical node src/app.js",
-		"setup:db": "node scripts/setup-database.js",
-		"build": "node scripts/setup-database.js",
-		"railway:deploy": "npm run setup:db && npm start"
-	},
+  "start": "node src/app.js",
+  "dev": "nodemon src/app.js",
+  "start:verbose": "LOG_LEVEL=verbose node src/app.js",
+  "start:critical": "LOG_LEVEL=critical node src/app.js",
+  "setup:db": "node scripts/setup-database.js",
+  "build": "npm run setup:db"
+},
 	"keywords": [
 		"social-media",
 		"api",
