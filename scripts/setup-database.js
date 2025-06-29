@@ -8,18 +8,18 @@ require("dotenv").config();
 
 const setupDatabase = async () => {
 	// Use DATABASE_URL for Railway, fallback to individual env vars for local
-	const poolConfig = process.env.DATABASE_URL ? {
-		connectionString: process.env.DATABASE_URL,
-		ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-	} : {
-		host: process.env.DB_HOST,
-		port: process.env.DB_PORT,
-		database: process.env.DB_NAME,
-		user: process.env.DB_USER,
-		password: process.env.DB_PASSWORD,
-	};
+	if (!process.env.DATABASE_URL) {
+  console.error("DATABASE_URL is not set!");
+  process.exit(1);
+}
 
-	const pool = new Pool(poolConfig);
+	const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+
 
 	try {
 		console.log("Setting up database...");
