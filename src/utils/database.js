@@ -33,11 +33,20 @@ const initializePool = () => {
 			logger.critical("Unexpected error on idle client", err);
 		});
 
+		logger.verbose("Pool stats", {
+  total: pool.totalCount,
+  idle: pool.idleCount,
+  waiting: pool.waitingCount,
+});
+
+
 		// Log connection configuration (without sensitive data)
 		logger.verbose(`Database configuration: ${process.env.DATABASE_URL ? 'Using DATABASE_URL' : 'Using individual env vars'}`);
 	}
 	return pool;
 };
+
+
 
 /**
  * Connect to the database and test connection
@@ -60,22 +69,33 @@ const connectDB = async () => {
  * @param {Array} params - Query parameters
  * @returns {Promise<Object>} Query result
  */
-const query = async (text, params = []) => {
+const isTransientError = (err) =>
+	err.message?.includes("Connection terminated") ||
+	err.message?.includes("timeout") ||
+	err.code === 'ECONNRESET' ||
+	err.code === '57P01';
+	const query = async (text, params = [], retries = 2) => {
 	const dbPool = initializePool();
 	const start = Date.now();
 
-	try {
-		const result = await dbPool.query(text, params);
-		const duration = Date.now() - start;
-		logger.verbose("Executed query", {
-			text,
-			duration,
-			rows: result.rowCount,
-		});
-		return result;
-	} catch (error) {
-		logger.critical("Database query error:", error);
-		throw error;
+	for (let attempt = 0; attempt <= retries; attempt++) {
+		try {
+			const result = await dbPool.query(text, params);
+			const duration = Date.now() - start;
+			logger.verbose("Executed query", {
+				text,
+				duration,
+				rows: result.rowCount,
+			});
+			return result;
+		} catch (error) {
+			if (attempt === retries || !isTransientError(error)) {
+				logger.critical("Database query error:", error);
+				throw error;
+			}
+			logger.warn(`Transient DB error (attempt ${attempt + 1}):`, error.message);
+			await new Promise((r) => setTimeout(r, 1000)); // wait before retry
+		}
 	}
 };
 

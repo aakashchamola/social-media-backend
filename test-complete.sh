@@ -255,3 +255,4 @@ echo "• GraphQL Playground: http://localhost:3000/graphql"
 echo "• Health Check: http://localhost:3000/health"
 
 echo -e "\n${YELLOW}🚀 Ready for Deployment!${NC}"
+# .end()
